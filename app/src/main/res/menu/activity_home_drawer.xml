@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_cards"
+            android:icon="@drawable/toolbar_cards_active"
+
+            android:title="@string/cards" />
+
+        <item
+            android:id="@+id/nav_accounts"
+            android:icon="@drawable/toolbar_loans_active"
+            android:title="@string/accounts" />
+
+        <item
+            android:id="@+id/nav_transfer"
+            android:icon="@drawable/external_account_transfer"
+            android:title="@string/transfer" />
+
+        <item
+            android:id="@+id/nav_invoices"
+            android:icon="@drawable/toolbar_payments_active"
+            android:title="@string/invoices" />
+
+        <item
+            android:id="@+id/nav_services"
+            android:icon="@drawable/login_phone_active"
+            android:title="@string/services" />
+
+
+        <item
+            android:id="@+id/nav_tools"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/tools" />
+
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_exchangeRate"
+                android:icon="@drawable/toolbar_currency_active"
+                android:title="@string/exchangeRate" />
+            <item
+                android:id="@+id/nav_maps"
+                android:icon="@drawable/toolbar_atm_active"
+                android:title="@string/maps" />
+
+            <item
+                android:id="@+id/nav_news"
+                android:icon="@drawable/toolbar_news_active"
+                android:title="@string/news" />
+
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/toolbar_info_active"
+                android:title="@string/about" />
+
+        </menu>
+    </item>
+
+</menu>
