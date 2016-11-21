@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import rm.ibanc.md.entites.form.AccountForm;
 import rm.ibanc.md.entites.rest.CardsList;
 import rm.ibanc.md.ibanc_rm.R;
 
@@ -21,27 +20,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.MyViewHo
 
     private List<CardsList> cardsList;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-
-        private ImageView types;
-        private TextView status;
-        private TextView pan;
-        private TextView description;
-
-        public MyViewHolder(View view) {
-            super(view);
-            types = (ImageView) view.findViewById(R.id.imageView2);
-            status = (TextView) view.findViewById(R.id.status);
-            pan = (TextView) view.findViewById(R.id.pan);
-            description = (TextView) view.findViewById(R.id.description);
-        }
-    }
-
-
     public AccountAdapter(List<CardsList> cardsList) {
         this.cardsList = cardsList;
     }
-
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -56,21 +37,59 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.MyViewHo
         CardsList accountForm = cardsList.get(position);
 
 
-        if (accountForm.getTypes().equals("MasterCard")) {
-            holder.types.setImageResource(R.drawable.list_mc);
-        } else if (accountForm.getTypes().equals("Visa")) {
-            holder.types.setImageResource(R.drawable.list_visa);
+        switch (accountForm.getTypes()) {
+            case "MasterCard": {
+
+                if (accountForm.getStatus().equals("Active")) {
+                    holder.types.setImageResource(R.drawable.list_mc);
+                } else {
+                    holder.types.setImageResource(R.drawable.list_mc_disable);
+
+                }
+
+            }
+            break;
+            case "Visa": {
+                if (accountForm.getStatus().equals("Active")) {
+                    holder.types.setImageResource(R.drawable.list_visa);
+                } else {
+                    holder.types.setImageResource(R.drawable.list_visa_disable);
+                }
+            }
+            break;
+
         }
 
+
         holder.status.setText(accountForm.getStatus());
-        holder.pan.setText(accountForm.getPan());
+        holder.pan.setText(accountForm.getMaskPan());
         holder.description.setText(accountForm.getDescription());
     }
-
 
     @Override
     public int getItemCount() {
         return cardsList.size();
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+
+        private ImageView types;
+        private TextView status;
+        private TextView pan;
+        private TextView description;
+
+
+        public MyViewHolder(View view) {
+            super(view);
+            types = (ImageView) view.findViewById(R.id.imageView2);
+            status = (TextView) view.findViewById(R.id.status);
+            pan = (TextView) view.findViewById(R.id.pan);
+            description = (TextView) view.findViewById(R.id.description);
+
+
+        }
+
+
     }
 
 

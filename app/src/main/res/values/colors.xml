@@ -3,7 +3,8 @@
 <resources>
     <color name="colorPrimary">#00695c</color>
     <color name="colorPrimaryDark">#004d40</color>
-    <color name="textColorPrimary">#ffffff</color>
+    <color name="textColorPrimary">#888888</color>
+    <color name="menuColorPrimary">#888888</color>>
     <color name="windowBackground">#e0f2f1</color>
     <color name="navigationBarColor">#212121</color>
     <color name="colorAccent">#00bfa5</color>

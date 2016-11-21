@@ -27,8 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="30dp"
-        android:layout_below="@id/imageView2" />
+        android:layout_below="@id/imageView2"
+        android:layout_marginTop="30dp" />
 
     <TextView
         android:id="@+id/pan"
@@ -47,6 +47,5 @@
         android:layout_alignParentLeft="true"
         android:textColor="@color/year" />
 
-    >
 
 </RelativeLayout>

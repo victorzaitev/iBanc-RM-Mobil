@@ -11,13 +11,9 @@ public class CardsList implements Serializable {
     private String status;
     private String pan;
     private String description;
+    private String maskPan;
 
-    public CardsList(String types, String status, String pan, String description) {
-        this.types = types;
-        this.status = status;
-        this.pan = pan;
-        this.description = description;
-    }
+
 
     public String getTypes() {
         return types;
@@ -49,5 +45,13 @@ public class CardsList implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getMaskPan() {
+        return maskPan;
+    }
+
+    public void setMaskPan(String maskPan) {
+        this.maskPan = maskPan;
     }
 }

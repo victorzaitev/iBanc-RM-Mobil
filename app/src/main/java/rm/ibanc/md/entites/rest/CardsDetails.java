@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class CardsDetails extends BaseEntity implements Serializable {
 
+
     public List<CardsList> cardsList = new ArrayList<>();
 
     public List<CardsList> getCardsList() {
@@ -18,4 +19,6 @@ public class CardsDetails extends BaseEntity implements Serializable {
     public void setCardsList(List<CardsList> cardsList) {
         this.cardsList = cardsList;
     }
+
+
 }

@@ -142,6 +142,6 @@
     <string name="maps">Maps</string>
     <string name="news">News</string>
     <string name="about">About</string>
-    <string name="title_activity_cards">CardsActivity</string>
+    <string name="title_activity_cards">Cards List</string>
 
 </resources>

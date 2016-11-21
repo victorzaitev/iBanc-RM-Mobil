@@ -10,12 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,25 +37,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import rm.ibanc.md.adapter.AccountAdapter;
-import rm.ibanc.md.entites.form.AccountForm;
 import rm.ibanc.md.entites.request.LogoutForm;
 import rm.ibanc.md.entites.request.RequestForm;
 import rm.ibanc.md.entites.rest.CardsDetails;
 import rm.ibanc.md.entites.rest.CustomersDetails;
 import rm.ibanc.md.helper.SessionManager;
 import rm.ibanc.md.helper.TokenManager;
-
 import rm.ibanc.md.ibanc_rm.R;
-import rm.ibanc.md.recyclerview.DividerItemDecoration;
-import rm.ibanc.md.recyclerview.ClickListener;
-import rm.ibanc.md.recyclerview.RecyclerTouchListener;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -127,7 +114,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
         if (session.isLoggedIn())
             new UserLogoutTask().execute();
@@ -156,7 +143,6 @@ public class HomeActivity extends AppCompatActivity
 
 
     //---------------------------------------------->
-
 
 
     @Override
@@ -189,16 +175,11 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.nav_cards) {
 
-            HttpHeaders requestHeaders = new HttpHeaders();
-            requestHeaders.setContentType(new MediaType("application", "json"));
-            RequestForm requestForm = new RequestForm();
-            requestForm.setGUID(tokenManager.getToken());
-            requestForm.setPersonalId(customersDetails.getPersonalId());
 
-            final HttpEntity<RequestForm> requestEntity = new HttpEntity<RequestForm>(requestForm, requestHeaders);
             String url = "http://172.18.111.101:8089/iBanc-RM-1.0/find/cards";
 
-            UserGetAccountTask userGetAccountTask = new UserGetAccountTask(requestEntity, url);
+
+            UserGetAccountTask userGetAccountTask = new UserGetAccountTask(url);
             userGetAccountTask.execute((Void) null);
 
 
@@ -255,89 +236,7 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-
-    public class UserGetAccountTask extends AsyncTask<Object, Object, CardsDetails> {
-
-        private final HttpEntity<RequestForm> requestEntity;
-
-        private final String url;
-
-        public UserGetAccountTask(HttpEntity<RequestForm> requestEntity, String url) {
-            this.requestEntity = requestEntity;
-            this.url = url;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            showProgress(true);
-        }
-
-        @Override
-        protected CardsDetails doInBackground(Object... params) {
-            // Create a new RestTemplate instance
-            RestTemplate restTemplate = new RestTemplate();
-
-            // Add the Jackson and String message converters
-            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-            restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-
-
-
-            ResponseEntity<CardsDetails> responseEntity = null;
-            try {
-                responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, CardsDetails.class);
-                return responseEntity.getBody();
-            } catch (HttpClientErrorException e) {
-
-                try {
-                    CardsDetails cardsDetailsResponse = new ObjectMapper().readValue(e.getResponseBodyAsString(), CardsDetails.class);
-                    return cardsDetailsResponse;
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                    return null;
-                }
-
-            } catch (ResourceAccessException ex){
-                return null;
-            } catch (Exception ex){
-                return null;
-            }
-
-        }
-
-        @Override
-        protected void onPostExecute(CardsDetails cardsDetails) {
-            showProgress(false);
-//--------->
-            Intent intent = new Intent(HomeActivity.this, CardsActivity.class);
-            startActivity(intent);
-//--------->
-
-            if (cardsDetails!=null) {
-                if (cardsDetails.getReturnCode() == 0) {
-
-                    tokenManager.setToken(cardsDetails.getToken());
-
-                  //  Intent intent = new Intent(HomeActivity.this, CardsActivity.class);
-
-                  //  intent.putExtra("CardsDetailsList",  (Serializable) cardsDetails.getCardsList());
-
-
-                    startActivity(intent);
-                    finish();
-                } else {
-                    showToastMessage(customersDetails.getReturnDescription());
-                }
-
-            } else {
-                showToastMessage("Sunt probleme cu conexiunea, verificati conexiunea cu internetul");
-            }
-
-        }
-    }
-
-
-    private void showToastMessage(final String showText){
+    private void showToastMessage(final String showText) {
         final Context context = getApplicationContext();
         Handler handler = new Handler(context.getMainLooper());
 
@@ -349,6 +248,105 @@ public class HomeActivity extends AppCompatActivity
                 toast.show();
             }
         });
+    }
+
+    public class UserGetAccountTask extends AsyncTask<Object, Object, CardsDetails> {
+
+
+        private final String url;
+
+        public UserGetAccountTask(String url) {
+            this.url = url;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            showProgress(true);
+        }
+
+        @Override
+        protected CardsDetails doInBackground(Object... params) {
+            // Create a new RestTemplate instance
+
+
+            HttpHeaders requestHeaders = new HttpHeaders();
+            requestHeaders.setContentType(new MediaType("application", "json"));
+
+            RequestForm requestForm = new RequestForm();
+            requestForm.setGuid(session.getGuid());
+
+
+            final HttpEntity<RequestForm> requestEntity = new HttpEntity<RequestForm>(requestForm, requestHeaders);
+
+
+            RestTemplate restTemplate = new RestTemplate();
+
+            // Add the Jackson and String message converters
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+
+
+            System.out.println("Zaitev " + requestEntity.toString());
+            System.out.println("Zaitev Body " + requestEntity.getBody());
+
+
+            CardsDetails responseEntity = null;
+            try {
+                responseEntity = restTemplate.postForObject(url, requestForm, CardsDetails.class);
+                return responseEntity;
+            } catch (HttpClientErrorException e) {
+
+                System.out.println("Zaitev Message " + e);
+
+                try {
+                    CardsDetails cardsDetailsResponse = new ObjectMapper().readValue(e.getResponseBodyAsString(), CardsDetails.class);
+                    return cardsDetailsResponse;
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    return null;
+                }
+
+            } catch (ResourceAccessException ex) {
+                return null;
+            } catch (Exception ex) {
+                return null;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(CardsDetails cardsDetails) {
+//--------->
+//            Intent intent = new Intent(HomeActivity.this, CardsActivity.class);
+//            startActivity(intent);
+//--------->
+            showProgress(false);
+            if (cardsDetails != null) {
+                if (cardsDetails.getReturnCode() == 0) {
+
+
+                    tokenManager.setToken(cardsDetails.getToken());
+
+                    Intent intent = new Intent(HomeActivity.this, CardsActivity.class);
+
+                    intent.putExtra("CardsDetailsList", cardsDetails);
+
+                    startActivity(intent);
+                    //   finish();
+                } else {
+                    showToastMessage(cardsDetails.getReturnDescription());
+                }
+
+            } else {
+                showToastMessage("Sunt probleme cu conexiunea, verificati conexiunea cu internetul");
+            }
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            showProgress(false);
+        }
     }
 
     public class UserLogoutTask extends AsyncTask {
