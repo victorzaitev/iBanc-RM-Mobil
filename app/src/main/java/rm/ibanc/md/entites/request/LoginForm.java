@@ -3,7 +3,7 @@ package rm.ibanc.md.entites.request;
 import java.util.Map;
 
 /**
- * Created by PC01017745 on 09.08.2016.
+ * Created by victor.zaitev on 09.08.2016.
  */
 public class LoginForm {
 

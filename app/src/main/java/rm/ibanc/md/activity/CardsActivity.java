@@ -28,7 +28,7 @@ import rm.ibanc.md.recyclerview.RecyclerTouchListener;
 
 public class CardsActivity extends AppCompatActivity {
 
-    CardsDetails cardsDetails;
+    private CardsDetails cardsDetails;
     private List<CardsList> cardsFormList = new ArrayList<>();
     private RecyclerView recyclerView;
     private AccountAdapter mAdapter;
@@ -43,8 +43,6 @@ public class CardsActivity extends AppCompatActivity {
 
         session = SessionManager.getInstance();
         cardsDetails = (CardsDetails) getIntent().getSerializableExtra("CardsDetailsList");
-//
-
 
         //-------------------------------------->
         recyclerView = (RecyclerView) findViewById(R.id.recycler_cards_view);

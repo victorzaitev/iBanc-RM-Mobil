@@ -14,7 +14,7 @@ import rm.ibanc.md.entites.rest.CardsList;
 import rm.ibanc.md.ibanc_rm.R;
 
 /**
- * Created by PC01017745 on 21.10.2016.
+ * Created by victor.zaitev on 21.10.2016.
  */
 public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.MyViewHolder> {
 
@@ -78,19 +78,12 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.MyViewHo
         private TextView pan;
         private TextView description;
 
-
         public MyViewHolder(View view) {
             super(view);
             types = (ImageView) view.findViewById(R.id.imageView2);
             status = (TextView) view.findViewById(R.id.status);
             pan = (TextView) view.findViewById(R.id.pan);
             description = (TextView) view.findViewById(R.id.description);
-
-
         }
-
-
     }
-
-
 }

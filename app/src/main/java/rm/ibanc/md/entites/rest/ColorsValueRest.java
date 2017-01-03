@@ -1,7 +1,7 @@
 package rm.ibanc.md.entites.rest;
 
 /**
- * Created by PC01017745 on 01.08.2016.
+ * Created by victor.zaitev on 01.08.2016.
  */
 public class ColorsValueRest {
     private String value;

@@ -1,7 +1,7 @@
 package rm.ibanc.md.entites.form;
 
 /**
- * Created by PC01017745 on 21.10.2016.
+ * Created by victor.zaitev on 21.10.2016.
  */
 public class AccountForm {
     private String title;

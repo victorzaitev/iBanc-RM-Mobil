@@ -1,7 +1,7 @@
 package rm.ibanc.md.entites.request;
 
 /**
- * Created by PC01017745 on 20.10.2016.
+ * Created by victor.zaitev on 20.10.2016.
  */
 public class RegisterForm {
 

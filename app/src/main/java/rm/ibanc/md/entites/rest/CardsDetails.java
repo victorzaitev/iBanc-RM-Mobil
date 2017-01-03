@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by PC01017745 on 25.10.2016.
+ * Created by victor.zaitev on 25.10.2016.
  */
 public class CardsDetails extends BaseEntity implements Serializable {
 

@@ -15,14 +15,11 @@
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
-        android:layout_alignParentRight="true"
-
-        />
+        android:layout_alignParentRight="true" />
 
 
     <TextView
         android:id="@+id/status"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -32,7 +29,6 @@
 
     <TextView
         android:id="@+id/pan"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -41,11 +37,9 @@
 
     <TextView
         android:id="@+id/description"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:textColor="@color/year" />
-
 
 </RelativeLayout>

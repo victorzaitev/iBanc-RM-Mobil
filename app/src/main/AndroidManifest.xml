@@ -18,8 +18,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality. 
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -27,13 +33,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MyMaterialTheme">
-        <activity
-            android:name="rm.ibanc.md.activity.MainActivityTemporary"
-            android:label="@string/app_name">
-
-            <!-- android:theme="@style/AppTheme.NoActionBar"> -->
-
-        </activity>
         <activity
             android:name="rm.ibanc.md.activity.MainActivity"
             android:label="@string/title_activity_main2"
@@ -53,7 +52,6 @@
         <activity
             android:name="rm.ibanc.md.activity.LoginActivity"
             android:label="@string/title_activity_login" />
-        <activity android:name="rm.ibanc.md.activity.ServiciiActivity" />
         <activity
             android:name="rm.ibanc.md.activity.CursActivity"
             android:label="@string/title_activity_curs"
@@ -73,7 +71,26 @@
         <activity
             android:name="rm.ibanc.md.activity.CardsActivity"
             android:label="@string/title_activity_cards"
-            android:theme="@style/MyMaterialTheme"></activity>
+            android:theme="@style/MyMaterialTheme" />
+        <activity
+            android:name="rm.ibanc.md.activity.ConvertorActivity"
+            android:label="@string/title_activity_convertor"
+            android:theme="@style/MyMaterialTheme" />
+        <activity
+            android:name="rm.ibanc.md.preference.SettingsHomeActivity"
+            android:label="@string/title_activity_settings_home" />
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
     </application>
 
 </manifest>

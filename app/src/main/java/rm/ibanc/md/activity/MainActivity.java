@@ -1,31 +1,27 @@
 package rm.ibanc.md.activity;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rm.ibanc.md.fragment.HomeFragment;
-import rm.ibanc.md.fragment.ServiciiFragment;
-import rm.ibanc.md.fragment.OtherFragment;
+import rm.ibanc.md.fragment.ExchangeFragment;
+import rm.ibanc.md.fragment.MapsFragment;
+import rm.ibanc.md.fragment.NewsFragment;
 import rm.ibanc.md.ibanc_rm.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -73,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
         setupTabIcons();
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,8 +77,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
 
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
 
@@ -95,26 +88,26 @@ public class MainActivity extends AppCompatActivity {
         TextView tabOne = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         tabOne.setText(getResources().getString(R.string.title_news));
 
-        tabOne.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.toolbar_news_inactive_mod, 0, 0);
+        tabOne.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_home_white, 0, 0);
         tabLayout.getTabAt(0).setCustomView(tabOne);
 
         TextView tabTwo = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         tabTwo.setText( getResources().getString(R.string.title_exchange));
-        tabTwo.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.toolbar_currency_inactive_modif, 0, 0);
+        tabTwo.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_trending_up_white, 0, 0);
         tabTwo.setWidth(1);
         tabLayout.getTabAt(1).setCustomView(tabTwo);
 
         TextView tabThree = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         tabThree.setText(getResources().getString(R.string.title_maps));
-        tabThree.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.toolbar_atm_inactive, 0, 0);
+        tabThree.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_map_white, 0, 0);
         tabLayout.getTabAt(2).setCustomView(tabThree);
     }
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new HomeFragment(), getResources().getString(R.string.title_news));
-        adapter.addFrag(new ServiciiFragment(), getResources().getString(R.string.title_exchange));
-        adapter.addFrag(new OtherFragment(), getResources().getString(R.string.title_maps));
+        adapter.addFrag(new NewsFragment(), getResources().getString(R.string.title_news));
+        adapter.addFrag(new ExchangeFragment(), getResources().getString(R.string.title_exchange));
+        adapter.addFrag(new MapsFragment(), getResources().getString(R.string.title_maps));
         viewPager.setAdapter(adapter);
     }
 
@@ -169,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 //        @Override
 //        public View onCreateView(LayoutInflater inflater, ViewGroup container,
 //                                 Bundle savedInstanceState) {
-//            View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+//            View rootView = inflater.inflate(R.layout.fragment_news, container, false);
 //            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
 //            return rootView;

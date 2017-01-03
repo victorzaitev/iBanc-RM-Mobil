@@ -1,15 +1,22 @@
 package rm.ibanc.md.activity;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources.Theme;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ThemedSpinnerAdapter;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,29 +25,73 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import android.widget.DatePicker;
 import android.widget.Spinner;
-import android.content.Context;
-import android.support.v7.widget.ThemedSpinnerAdapter;
-import android.content.res.Resources.Theme;
-
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import rm.ibanc.md.entites.rest.ColorsValueRest;
-import rm.ibanc.md.ibanc_rm.R;
-
-
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-public class CursActivity extends AppCompatActivity {
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
+import rm.ibanc.md.adapter.ExchangeAdapter;
+import rm.ibanc.md.constant.UrlConstant;
+import rm.ibanc.md.entites.request.ExchangeRateForm;
+import rm.ibanc.md.entites.rest.ExchangeRateDetails;
+import rm.ibanc.md.entites.rest.ExchangeRateList;
+import rm.ibanc.md.entites.view.ExchangeDetails;
+import rm.ibanc.md.ibanc_rm.R;
+import rm.ibanc.md.recyclerview.DividerItemDecoration;
+
+public class CursActivity extends AppCompatActivity {
+    private int selectPosition = 0;
+    //--------------------------------------------------------------------------------------------
+    public DatePickerDialog.OnDateSetListener datePickerListener
+            = new DatePickerDialog.OnDateSetListener() {
+
+        // when dialog box is closed, below method will be called.
+        public void onDateSet(DatePicker view, int selectedYear,
+                              int selectedMonth, int selectedDay) {
+
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-M-yyyy");
+            String dateInString = selectedDay + "-" + (selectedMonth + 1) + "-" + selectedYear;
+
+            Date date = null;
+            try {
+                date = sdf.parse(dateInString);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, PlaceholderFragment.newInstance(selectPosition, date))
+                    .commit();
+
+
+        }
+    };
+    private Calendar calendar;
+    private DatePickerDialog datePickerDialog;
+    private int year, month, day;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +119,9 @@ public class CursActivity extends AppCompatActivity {
                 // When the given dropdown item is selected, show its contents in the
                 // container view.
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                        .replace(R.id.container, PlaceholderFragment.newInstance(position + 1, new Date()))
                         .commit();
+                selectPosition = position + 1;
             }
 
             @Override
@@ -88,7 +140,6 @@ public class CursActivity extends AppCompatActivity {
 
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -105,6 +156,23 @@ public class CursActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+
+            calendar = Calendar.getInstance();
+
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            datePickerDialog = new DatePickerDialog(this, datePickerListener, year, month, day);
+            datePickerDialog.show();
+
+            return true;
+        } else if (id == R.id.convertor_valutar) {
+
+            Intent covertActivity = new Intent(CursActivity.this, ConvertorActivity.class);
+            startActivity(covertActivity);
+
             return true;
         }
 
@@ -120,7 +188,6 @@ public class CursActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
     }
-
 
     private static class MyAdapter extends ArrayAdapter<String> implements ThemedSpinnerAdapter {
         private final Helper mDropDownHelper;
@@ -158,7 +225,7 @@ public class CursActivity extends AppCompatActivity {
             mDropDownHelper.setDropDownViewTheme(theme);
         }
     }
-
+    //--------------------------------------------------------------------------------------------
 
     /**
      * A placeholder fragment containing a simple view.
@@ -170,25 +237,30 @@ public class CursActivity extends AppCompatActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-
-        ListView mListView;
+        private Date date;
+        private RecyclerView recyclerView;
+        private ExchangeAdapter mAdapter;
+        private List<ExchangeDetails> exchangeFormList = new ArrayList<>();
 
         //final Adapter mAdapter = null;
-
         public PlaceholderFragment() {
+
         }
+
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
+        public static PlaceholderFragment newInstance(int sectionNumber, Date date) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
+            fragment.date = date;
             return fragment;
         }
+
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -197,12 +269,23 @@ public class CursActivity extends AppCompatActivity {
 
             View rootView = inflater.inflate(R.layout.fragment_curs, container, false);
 
-            mListView = (ListView) rootView.findViewById(R.id.listView);
+            //mListView = (ListView) rootView.findViewById(R.id.listView);
+            recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+
+            mAdapter = new ExchangeAdapter(exchangeFormList);
+
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+            recyclerView.setMinimumHeight(3000);
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(mLayoutManager);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
 
 
+            recyclerView.setAdapter(mAdapter);
             final int position = getArguments().getInt(ARG_SECTION_NUMBER);
 
-            new RetrieveFeedTask().execute(position);
+            new RetrieveFeedTask(date, position + 1).execute();
 
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 
@@ -213,9 +296,17 @@ public class CursActivity extends AppCompatActivity {
             return rootView;
         }
 
-        public class RetrieveFeedTask extends AsyncTask<Integer, Void, ColorsValueRest[]> {
+        public final class RetrieveFeedTask extends AsyncTask<Void, Void, ExchangeRateDetails> {
 
+            private Date date;
             private ProgressDialog progressDialog;
+            private int selectPosition;
+
+            public RetrieveFeedTask(Date date, int selectPosition) {
+                this.date = date;
+                this.selectPosition = selectPosition;
+            }
+
 
             @Override
             protected void onPreExecute() {
@@ -228,38 +319,93 @@ public class CursActivity extends AppCompatActivity {
 
 
             @Override
-            protected ColorsValueRest[] doInBackground(Integer... position) {
+            protected ExchangeRateDetails doInBackground(Void... position) {
 
-                final String url = "http://172.18.111.101:8089/FactoryDream-1.1/rest/valueColors";
+                if (date == null) {
+                    date = new Date();
+                }
 
-                System.out.println("URL=" + position[0]);
+
+                final String url = UrlConstant.findExchangeRateByDate;
+
+                HttpHeaders requestHeaders = new HttpHeaders();
+                requestHeaders.setContentType(new MediaType("application", "json"));
+                ExchangeRateForm exchangeRateForm = new ExchangeRateForm();
+                exchangeRateForm.setDateCurs(date);
+
+                final HttpEntity<ExchangeRateForm> requestEntity = new HttpEntity<>(exchangeRateForm, requestHeaders);
 
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                ResponseEntity<ColorsValueRest[]> responseEntity = restTemplate.getForEntity(url, ColorsValueRest[].class);
+                restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
 
-                // ColorsValueRest colorsValueRest = restTemplate.getForObject(url[0], ColorsValueRest.class);
-                ColorsValueRest[] colorsValueRest = responseEntity.getBody();
 
-                System.out.println("colorsValueRest=" + colorsValueRest.length);
-                System.out.println("Label 1 = " + colorsValueRest[0].getLabel());
-                return colorsValueRest;
+                ResponseEntity<ExchangeRateDetails> responseEntity = null;
+
+                try {
+                    responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, ExchangeRateDetails.class);
+                    return responseEntity.getBody();
+                } catch (HttpClientErrorException e) {
+                    try {
+                        ExchangeRateDetails exchangeRateDetails = new ObjectMapper().readValue(e.getResponseBodyAsString(), ExchangeRateDetails.class);
+                        return exchangeRateDetails;
+                    } catch (IOException exxx) {
+                        return null;
+                    }
+
+                } catch (ResourceAccessException e) {
+                    return null;
+                } catch (Exception ex) {
+                    return null;
+                }
 
             }
 
             @Override
-            protected void onPostExecute(ColorsValueRest[] colorsValueRests) {
+            protected void onPostExecute(ExchangeRateDetails exchangeRateDetails) {
 
-                System.out.println("postExecuten " + colorsValueRests.length);
 
-                List<String> list = new ArrayList();
-                for (int i = 0; i < colorsValueRests.length; i++) {
-                    list.add(colorsValueRests[i].getValue());
+                if (exchangeRateDetails != null) {
+
+                    if (exchangeRateDetails.getReturnCode() == 0) {
+
+                        for (ExchangeRateList exchangeRateList : exchangeRateDetails.getExchangeRateList()) {
+                            ExchangeDetails exchangeForm = new ExchangeDetails();
+
+                            exchangeForm.setValuta(exchangeRateList.getValutaShortName());
+                            exchangeForm.setCumparare(exchangeRateList.getBuyCurs());
+                            exchangeForm.setVinzare(exchangeRateList.getSellCurs());
+                            exchangeForm.setImagePath(exchangeRateList.getImagePath());
+                            exchangeForm.setCursBnm(exchangeRateList.getOfficialCurs());
+
+
+                            exchangeFormList.add(exchangeForm);
+                        }
+                    } else {
+                        showToastMessage(exchangeRateDetails.getReturnDescription());
+                    }
+                } else {
+                    showToastMessage("Sunt probleme cu conexiunea, verificati conexiunea cu internetul");
                 }
 
-                final ListAdapter mAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, list);
-                mListView.setAdapter(mAdapter);
+
+                mAdapter.notifyDataSetChanged();
                 progressDialog.dismiss();
+            }
+
+
+            private void showToastMessage(final String showText) {
+                final Context context = getContext();
+                Handler handler = new Handler(context.getMainLooper());
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int duration = Toast.LENGTH_LONG;
+                        Toast toast = Toast.makeText(context, showText, duration);
+                        toast.show();
+                    }
+                });
             }
         }
     }

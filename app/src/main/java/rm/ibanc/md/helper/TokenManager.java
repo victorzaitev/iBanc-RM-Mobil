@@ -1,13 +1,12 @@
 package rm.ibanc.md.helper;
 
 /**
- * Created by PC01017745 on 03.10.2016.
+ * Created by victor.zaitev on 03.10.2016.
  */
 public class TokenManager {
 
+    private static TokenManager instance;
     private String token;
-
-    private static  TokenManager instance;
 
     private TokenManager(){}
 
@@ -30,11 +29,7 @@ public class TokenManager {
 
     public boolean isTokenExist(){
 
-        if (token == null || token.isEmpty() || token.trim().equals("")){
-            return false;
-        } else{
-            return true;
-        }
+        return !(token == null || token.isEmpty() || token.trim().equals(""));
     }
 
 

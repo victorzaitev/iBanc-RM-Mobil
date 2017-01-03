@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by PC01017745 on 29.09.2016.
+ * Created by victor.zaitev on 29.09.2016.
  */
 public class CustomersDetails extends BaseEntity implements Serializable {
 

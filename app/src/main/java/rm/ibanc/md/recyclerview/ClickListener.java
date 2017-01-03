@@ -3,7 +3,7 @@ package rm.ibanc.md.recyclerview;
 import android.view.View;
 
 /**
- * Created by PC01017745 on 24.10.2016.
+ * Created by victor.zaitev on 24.10.2016.
  */
 public interface ClickListener {
 

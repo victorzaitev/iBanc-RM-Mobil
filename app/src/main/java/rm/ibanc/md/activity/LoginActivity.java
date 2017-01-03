@@ -1,25 +1,21 @@
 package rm.ibanc.md.activity;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -27,8 +23,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -48,31 +42,29 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import rm.ibanc.md.constant.UrlConstant;
 import rm.ibanc.md.entites.request.LoginForm;
-import rm.ibanc.md.entites.request.RegisterForm;
 import rm.ibanc.md.entites.rest.CustomersDetails;
 import rm.ibanc.md.helper.SessionManager;
 import rm.ibanc.md.helper.TokenManager;
 import rm.ibanc.md.ibanc_rm.R;
 
-import static android.Manifest.permission.READ_CONTACTS;
-
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity {
 
     /**
-     * Id to identity READ_CONTACTS permission request.
+     * Id to identity READ_PHONE_STATE permission request.
      */
-    private static final int REQUEST_READ_CONTACTS = 0;
+
+    private static final int REQUEST_READ_PHONE_STATE = 1;
+    private TelephonyManager tm;
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -85,7 +77,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
+    private EditText mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
@@ -112,9 +104,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             finish();
         }
 
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+        mEmailView = (EditText) findViewById(R.id.email);
 
+        verifyTelephonyManager();
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -141,35 +133,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
 
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayRequestContacts() {
+    private void verifyTelephonyManager() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
+            tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+            if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(LoginActivity.this,
+                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                        REQUEST_READ_PHONE_STATE);
+            } else {
+                tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            }
         }
-        return false;
     }
+
 
     /**
      * Callback received when a permissions request has been completed.
@@ -177,13 +154,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
+
+        switch (requestCode) {
+
+
+            case REQUEST_READ_PHONE_STATE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                } else {
+//------------->                  //  boolean should = ActivityCompat.shouldShowRequestPermissionRationale((Activity) cont, Manifest.permission.READ_PHONE_STATE);
+//------------->
+//------------->
+//------------->
+                }
+
             }
+            break;
+
+
         }
     }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -211,10 +201,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
-        } else if (!isPasswordValid(password)){
+        } else if (!isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_incorrect_password));
             focusView = mPasswordView;
-            cancel= true;
+            cancel = true;
         }
 
         // Check for a valid email address.
@@ -293,48 +283,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -347,17 +295,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 finish();
             }
         }
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
     /**
@@ -379,13 +316,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
 
             LoginForm loginForm = setLoginForm();
-            
+
             return getCustomersDetails(loginForm);
 
         }
-
-
-
 
 
         @Override
@@ -393,7 +327,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
 
-            if (customersDetails!=null) {
+            if (customersDetails != null) {
                 if (customersDetails.getReturnCode() == 0) {
                     session.setGuid(customersDetails.getGuid());
                     tokenManager.setToken(customersDetails.getToken());
@@ -418,16 +352,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
 
-
-
-        private LoginForm setLoginForm(){
+        private LoginForm setLoginForm() {
 
             Map<String, String> devicesDetail = new HashMap<>();
 
             devicesDetail.put("brand", Build.BRAND);
             devicesDetail.put("product", Build.PRODUCT);
             devicesDetail.put("model", Build.MODEL);
-            TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
 
             devicesDetail.put("IMIE", tm.getDeviceId());
             devicesDetail.put("IMSI", tm.getSubscriberId());
@@ -454,9 +386,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
 
-
-
-
         private CustomersDetails getCustomersDetails(LoginForm loginForm) {
 
 
@@ -464,24 +393,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             HttpHeaders requestHeaders = new HttpHeaders();
             requestHeaders.setContentType(new MediaType("application", "json"));
             final HttpEntity<LoginForm> requestEntity = new HttpEntity<LoginForm>(loginForm, requestHeaders);
-
-            System.out.println("Zaitev Login String " + requestEntity.toString());
-            System.out.println("Zaitev Login Body " + requestEntity.getBody());
-
-
-
-            RegisterForm registerForm = new RegisterForm();
-
-            registerForm.setEmail("victor.zaitev@maib.md");
-            registerForm.setAdress("V. Alexandri");
-            registerForm.setCity("Chisinau");
-            registerForm.setFirsName("Victor");
-            registerForm.setLang("EN");
-            registerForm.setLastName("Zaitev");
-            registerForm.setPassword("Admin123#");
-
-
-            //----------> ma     final HttpEntity<RegisterForm> requestEntity = new HttpEntity<RegisterForm>(registerForm, requestHeaders);
 
             // Create a new RestTemplate instance
             RestTemplate restTemplate = new RestTemplate();
@@ -491,8 +402,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
 
 
-             String url = "http://172.18.111.101:8089/iBanc-RM-1.0/login/customers";
-            //---------->             String url = "http://172.18.111.101:8089/iBanc-RM-1.0/register/customer";
+            String url = UrlConstant.loginCustomers;
+
             // Make the HTTP POST request, marshaling the request to JSON, and the response to a String
             ResponseEntity<CustomersDetails> responseEntity = null;
             try {
@@ -508,15 +419,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     return null;
                 }
 
-            } catch (ResourceAccessException ex){
+            } catch (ResourceAccessException ex) {
                 return null;
-            } catch (Exception ex){
+            } catch (Exception ex) {
                 return null;
             }
 
         }
 
-        private void showToastMessage(final String showText){
+        private void showToastMessage(final String showText) {
             final Context context = getApplicationContext();
             Handler handler = new Handler(context.getMainLooper());
 
@@ -532,4 +443,3 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 }
-

@@ -5,10 +5,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -39,6 +41,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
+import rm.ibanc.md.constant.UrlConstant;
 import rm.ibanc.md.entites.request.LogoutForm;
 import rm.ibanc.md.entites.request.RequestForm;
 import rm.ibanc.md.entites.rest.CardsDetails;
@@ -46,6 +49,7 @@ import rm.ibanc.md.entites.rest.CustomersDetails;
 import rm.ibanc.md.helper.SessionManager;
 import rm.ibanc.md.helper.TokenManager;
 import rm.ibanc.md.ibanc_rm.R;
+import rm.ibanc.md.preference.SettingsHomeActivity;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -61,8 +65,7 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(
-                R.layout.activity_home);
+        setContentView(R.layout.activity_home);
         mProgressView = findViewById(R.id.activity_progress);
         session = SessionManager.getInstance();
         tokenManager = TokenManager.getInstance();
@@ -92,7 +95,20 @@ public class HomeActivity extends AppCompatActivity
 
         textNameView = (TextView) headerView.findViewById(R.id.textNameView);
         textEmailView = (TextView) headerView.findViewById(R.id.textEmailView);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+
+        StringBuilder builder = new StringBuilder();
+
+
+        builder.append("\n" + "Example Switch:\t" + sharedPrefs.getBoolean("example_switch", true));
+        builder.append("\n" + "Example Text:\t" + sharedPrefs.getString("example_text", "None"));
+        builder.append("\n" + "Example List:\t" + sharedPrefs.getString("example_list", "Not known to us"));
+        builder.append("\n" + "Notifications New Message:\t" + sharedPrefs.getBoolean("notifications_new_message", true));
+        builder.append("\n" + "Customized Notification Ringtone:\t" + sharedPrefs.getString("notifications_new_message_ringtone", ""));
+        builder.append("\n" + "Notifications New Message Vibrate" + sharedPrefs.getBoolean("notifications_new_message_vibrate", true));
+        builder.append("\n\nClick on Settings Button at bottom right corner to Modify Your Prefrences");
+        System.out.println("Zaitev: " + builder.toString());
     }
 
     @Override
@@ -161,6 +177,11 @@ public class HomeActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_userPage) {
+
+            Intent intent = new Intent(HomeActivity.this, SettingsHomeActivity.class);
+            startActivity(intent);
+
+
             return true;
         }
 
@@ -176,7 +197,7 @@ public class HomeActivity extends AppCompatActivity
         if (id == R.id.nav_cards) {
 
 
-            String url = "http://172.18.111.101:8089/iBanc-RM-1.0/find/cards";
+            String url = UrlConstant.findCards;
 
 
             UserGetAccountTask userGetAccountTask = new UserGetAccountTask(url);
@@ -194,7 +215,8 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.nav_tools) {
             Toast.makeText(getApplicationContext(), "Tools is selected!", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_exchangeRate) {
-            Toast.makeText(getApplicationContext(), "Exchange Rate is selected!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(HomeActivity.this, CursActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_maps) {
             Toast.makeText(getApplicationContext(), "Maps is selected!", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_news) {
@@ -378,7 +400,7 @@ public class HomeActivity extends AppCompatActivity
             restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
 
 
-            String url = "http://172.18.111.101:8089/iBanc-RM-1.0/logout/customers";
+            String url = UrlConstant.logoutCustomers;
             // Make the HTTP POST request, marshaling the request to JSON, and the response to a String
             ResponseEntity<Void> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
 

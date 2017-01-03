@@ -1,19 +1,13 @@
 package rm.ibanc.md.helper;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.util.Log;
-
 
 /**
- * Created by PC01017745 on 28.09.2016.
+ * Created by victor.zaitev on 28.09.2016.
  */
 public class SessionManager {
 
 
-    private String guid;
-
     private static SessionManager instance;
+    private String guid;
 
     private SessionManager(){}
 
@@ -36,11 +30,7 @@ public class SessionManager {
 
     public boolean isLoggedIn(){
 
-        if (guid == null || guid.isEmpty() || guid.trim().equals("")){
-            return false;
-        } else{
-            return true;
-        }
+        return !(guid == null || guid.isEmpty() || guid.trim().equals(""));
     }
 
 }

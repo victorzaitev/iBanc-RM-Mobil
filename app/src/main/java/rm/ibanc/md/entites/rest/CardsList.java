@@ -3,7 +3,7 @@ package rm.ibanc.md.entites.rest;
 import java.io.Serializable;
 
 /**
- * Created by PC01017745 on 25.10.2016.
+ * Created by victor.zaitev on 25.10.2016.
  */
 public class CardsList implements Serializable {
 
